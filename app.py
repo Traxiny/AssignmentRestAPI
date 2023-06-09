@@ -61,6 +61,35 @@ def create_movie():
     else:
         return jsonify({'error': 'Bad Request status'}), 400
 
+
+@app.route('/movies/<int:id>', methods=['PUT'])
+def update_movie(id):
+    new_movie = request.get_json()
+    set_clause = ', '.join([f'{key} = ?' for key in new_movie.keys()])
+    if new_movie:
+        with sqlite3.connect("test.db") as conn:
+            app.config['DATABASE'] = conn
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM Movies WHERE id == ?",(id,))
+            row = cursor.fetchone()
+            if row is None:
+                return jsonify({'error': 'Movie not found'}), 404
+            values = list(new_movie.values()) + [id]
+            cursor.execute(f"UPDATE Movies SET {set_clause} WHERE id == ?", values)
+            cursor.execute("SELECT * FROM Movies WHERE id == ?",(id,))
+            row = cursor.fetchone()
+
+        movie = {
+            'id': row[0],
+            'title': row[1],
+            'description': row[2],
+            'release_year': row[3]
+        }
+
+        return jsonify(movie)
+    else:
+        return jsonify({'error': 'Bad Request status'}), 400
+
 if __name__ == '__main__':
     app.run()   
 
