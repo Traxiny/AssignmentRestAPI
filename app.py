@@ -91,7 +91,7 @@ def update_movie(id):
         return jsonify({'error': 'Bad Request status'}), 400
 
 if __name__ == '__main__':
-    app.run()   
+    app.run(host='127.0.0.1', port=5000)   
 
 @app.teardown_appcontext
 def close_connection(exception):
